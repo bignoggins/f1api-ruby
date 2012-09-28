@@ -3,6 +3,8 @@ require 'json'
 module FellowshipOneAPI
   # Creating a wrapper for the ActiveResource::Connection class
   class Connection < ActiveResource::Connection
+    attr_accessor :resource_class
+
     # Pass in a new connection to the API
     def initialize(f1api_connection, *args)
       @f1api_connection = f1api_connection
@@ -45,7 +47,7 @@ module FellowshipOneAPI
     def transform_get_response(response_body)
       json = JSON.parse(response_body)
       if json.keys.first == "results"
-        results = json["results"][self.class.name.downcase]
+        results = json["results"][self.resource_class.name.downcase]
         (json["results"].keys.find_all {|key| key[0] == '@' && key != '@array'}).each do |key|
           results.each do |result|
             result.merge!({key => json["results"][key]})

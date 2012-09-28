@@ -11,6 +11,7 @@ module FellowshipOneAPI # :nodoc:
     def self.connect(client, refresh = false)
       if(refresh or @connection.nil?)
         @connection = Connection.new(client, client.consumer.site, format)
+        @connection.resource_class = self
       end
     end
 
