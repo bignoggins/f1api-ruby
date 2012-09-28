@@ -12,20 +12,7 @@ Gem::Specification.new do |s|
     "LICENSE",
     "README.md"
   ]
-  s.files = %w[
-    config/f1-oauth.yml
-    lib/f1api.rb
-    lib/f1api/activeresource/base.rb
-    lib/f1api/activeresource/connection.rb
-    lib/f1api/client.rb
-    lib/f1api/configuration.rb
-    lib/f1api/oauth.rb
-    lib/f1api/oauth/credentials_authentication.rb
-    lib/f1api/oauth/oauth_authentication.rb
-    LICENSE
-    README.md
-    Rakefile
-  ]
+  s.files = `git ls-files`.split($\)
 
   s.test_files = %w[
     test/fixtures/access_token.rb
@@ -40,9 +27,8 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
   s.summary = %q{Consume the Fellowship One API in your apps using ActiveResource}
 
-  s.add_runtime_dependency('oauth', ">= 0.4.4")
-  s.add_runtime_dependency('activeresource')
+  s.add_dependency('oauth', ">= 0.4.4")
+  s.add_dependency('activeresource')
   s.add_development_dependency('mocha')
-  s.add_runtime_dependency('activeresource')
 end
 
