@@ -47,7 +47,7 @@ module FellowshipOneAPI
     def transform_get_response(response_body)
       json = JSON.parse(response_body)
       if json.keys.first == "results"
-        results = json["results"][self.resource_class.name.downcase]
+        results = json["results"][self.resource_class.name.split("::").last.downcase]
         (json["results"].keys.find_all {|key| key[0] == '@' && key != '@array'}).each do |key|
           results.each do |result|
             result.merge!({key => json["results"][key]})
