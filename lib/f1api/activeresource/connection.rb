@@ -76,8 +76,7 @@ module FellowshipOneAPI
 
     def transform_and_save(http_verb, path, request_body, record)
       merged_entity = JSON.parse(record)
-      entity_type = merged_entity.keys.first
-      new_values = {entity_type => JSON.parse(request_body)}
+      new_values = JSON.parse(request_body)
 
       merged_entity = set_f1_hash_to_ar_values(merged_entity, new_values)
 
