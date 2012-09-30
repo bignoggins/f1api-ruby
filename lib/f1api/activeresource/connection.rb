@@ -12,11 +12,14 @@ module FellowshipOneAPI
     end
 
     private
+
     # The request method that is passes the request through to the F1 API client
     def request(method, path, *args)
       if @f1api_connection == nil
         super(method, path, *args)
       else
+        path = fix_path(path)
+
         case method
         when :get
           response = @f1api_connection.request(method, path, *args)
@@ -31,7 +34,7 @@ module FellowshipOneAPI
     end
 
     def transform_create_request(path, request_body)
-      new_path = "#{path}/new.json"
+      new_path = "#{path.gsub(".json", "")}/new.json"
       new_record = @f1api_connection.request :get, new_path
 
       transform_and_save(:post, path, request_body, new_record.body)
@@ -48,6 +51,8 @@ module FellowshipOneAPI
       json = JSON.parse(response_body)
       if json.keys.first == "results"
         results = json["results"][self.resource_class.name.split("::").last.downcase]
+        return "[]" unless results
+
         (json["results"].keys.find_all {|key| key[0] == '@' && key != '@array'}).each do |key|
           results.each do |result|
             result.merge!({key => json["results"][key]})
@@ -65,24 +70,45 @@ module FellowshipOneAPI
     def set_f1_hash_to_ar_values(f1_hash, ar_hash)
       f1_hash.each do |key, val|
         if val.is_a? Hash
-          set_f1_hash_to_ar_values(val, ar_hash[key])
+          set_f1_hash_to_ar_values(val, ar_hash[key]) unless ar_hash.nil?
         else
-          f1_hash[key] = ar_hash[key]
+          f1_hash[key] = ar_hash[key] unless ar_hash.nil? || (key == "@id" && ar_hash[key].nil?)
         end
       end
     end
 
     def transform_and_save(http_verb, path, request_body, record)
       merged_entity = JSON.parse(record)
-      entity_type = merged_entity.keys.first
-      new_values = {entity_type => JSON.parse(request_body)}
+      new_values = JSON.parse(request_body)
+      new_values = camelize_root(new_values)
 
       merged_entity = set_f1_hash_to_ar_values(merged_entity, new_values)
 
       if path =~ /\/[vV]1\/(.*)\/(.*)$/
-        new_path = "/V1/#{$1.capitalize}/#{$2}"
+        path = "/V1/#{$1.capitalize}/#{$2}"
       end
-      @f1api_connection.request(http_verb, new_path, JSON.dump(merged_entity), {'Content-Type' => 'application/json'})
+      @f1api_connection.request(http_verb, path, JSON.dump(merged_entity), {'Content-Type' => 'application/json'})
+    end
+
+    def fix_path(path)
+      # F1 runs words in paths together (contribution_receipts is contributionreceipts, but why??)
+      path = path.gsub("_", "")
+
+      # Oh yeah.  They also deviate from the rest of the path formats
+      # by prepending "/giving" for all paths in the Giving realm.
+
+      # Add more resources as needed
+      giving_realm_resources = %w[contributionreceipts]
+      path = "/giving#{path}" if giving_realm_resources.any? { |resource| path.include? resource }
+
+      path
+    end
+
+    def camelize_root(hash)
+      key = hash.keys.first
+      new_key = key.camelize
+      new_key = "#{new_key.first.downcase}#{new_key[1..-1]}"
+      { new_key => hash[key] }
     end
   end
 end
