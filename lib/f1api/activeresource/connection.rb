@@ -77,6 +77,7 @@ module FellowshipOneAPI
     def transform_and_save(http_verb, path, request_body, record)
       merged_entity = JSON.parse(record)
       new_values = JSON.parse(request_body)
+      new_values = camelize_root(new_values)
 
       merged_entity = set_f1_hash_to_ar_values(merged_entity, new_values)
 
@@ -84,6 +85,13 @@ module FellowshipOneAPI
         new_path = "/V1/#{$1.capitalize}/#{$2}"
       end
       @f1api_connection.request(http_verb, new_path, JSON.dump(merged_entity), {'Content-Type' => 'application/json'})
+    end
+
+    def camelize_root(hash)
+      key = hash.keys.first
+      new_key = key.camelize
+      new_key = "#{new_key.first.downcase}#{new_key[1..-1]}"
+      { new_key => hash[key] }
     end
   end
 end
