@@ -12,11 +12,14 @@ module FellowshipOneAPI
     end
 
     private
+
     # The request method that is passes the request through to the F1 API client
     def request(method, path, *args)
       if @f1api_connection == nil
         super(method, path, *args)
       else
+        path = fix_path(path)
+
         case method
         when :get
           response = @f1api_connection.request(method, path, *args)
@@ -85,6 +88,20 @@ module FellowshipOneAPI
         new_path = "/V1/#{$1.capitalize}/#{$2}"
       end
       @f1api_connection.request(http_verb, new_path, JSON.dump(merged_entity), {'Content-Type' => 'application/json'})
+    end
+
+    def fix_path(path)
+      # F1 runs words in paths together (contribution_receipts is contributionreceipts, but why??)
+      path = path.gsub("_", "")
+
+      # Oh yeah.  They also deviate from the rest of the path formats
+      # by prepending "/giving" for all paths in the Giving realm.
+
+      # Add more resources as needed
+      giving_realm_resources = %w[contributionreceipts]
+      path = "/giving#{path}" if giving_realm_resources.any? { |resource| path.include? resource }
+
+      path
     end
 
     def camelize_root(hash)
