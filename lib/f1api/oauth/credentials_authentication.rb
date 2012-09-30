@@ -35,7 +35,7 @@ module FellowshipOneAPI # :nodoc:
       alias :authorize :authenticate
 
       private
-     def handle_response_code(response)
+      def handle_response_code(response)
         case response.code.to_i
         when (200..299)
           @oauth_access_token = ::OAuth::AccessToken.from_hash(@oauth_consumer, parse_access_token(response.body))
@@ -44,7 +44,7 @@ module FellowshipOneAPI # :nodoc:
           # TODO: actually redirect instead of throwing error
           response.error!
         when (400..499)
-          raise OAuth::Unauthorized, response
+          raise ::OAuth::Unauthorized, response
         else
           response.error!
         end
@@ -74,6 +74,6 @@ module FellowshipOneAPI # :nodoc:
         end
         oauth_hash
       end
-   end
+    end
   end
 end
