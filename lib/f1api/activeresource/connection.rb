@@ -67,9 +67,9 @@ module FellowshipOneAPI
     def set_f1_hash_to_ar_values(f1_hash, ar_hash)
       f1_hash.each do |key, val|
         if val.is_a? Hash
-          set_f1_hash_to_ar_values(val, ar_hash[key])
+          set_f1_hash_to_ar_values(val, ar_hash[key]) unless ar_hash.nil?
         else
-          f1_hash[key] = ar_hash[key]
+          f1_hash[key] = ar_hash[key] unless ar_hash.nil? || (key == "@id" && ar_hash[key].nil?)
         end
       end
     end
