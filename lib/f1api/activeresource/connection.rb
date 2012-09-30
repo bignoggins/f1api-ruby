@@ -85,9 +85,9 @@ module FellowshipOneAPI
       merged_entity = set_f1_hash_to_ar_values(merged_entity, new_values)
 
       if path =~ /\/[vV]1\/(.*)\/(.*)$/
-        new_path = "/V1/#{$1.capitalize}/#{$2}"
+        path = "/V1/#{$1.capitalize}/#{$2}"
       end
-      @f1api_connection.request(http_verb, new_path, JSON.dump(merged_entity), {'Content-Type' => 'application/json'})
+      @f1api_connection.request(http_verb, path, JSON.dump(merged_entity), {'Content-Type' => 'application/json'})
     end
 
     def fix_path(path)
