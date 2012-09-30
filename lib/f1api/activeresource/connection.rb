@@ -31,7 +31,7 @@ module FellowshipOneAPI
     end
 
     def transform_create_request(path, request_body)
-      new_path = "#{path}/new.json"
+      new_path = "#{path.gsub(".json", "")}/new.json"
       new_record = @f1api_connection.request :get, new_path
 
       transform_and_save(:post, path, request_body, new_record.body)
